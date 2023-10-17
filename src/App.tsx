@@ -12,41 +12,49 @@ import tortellini from './assets/images/plate__tortellini.png';
 
 const menuItems = [
   {
+    id: 1,
     description: 'Bacon and Eggs',
     image: baconEggs,
     price: 344
   },
   {
+    id: 2,
     description: 'Chicken Salad',
     image: chickenSalad,
     price: 100
   },
   {
+    id: 3,
     description: 'Fish Sticks with French Fries',
     image: fishSticksFries,
     price: 100
   },
   {
+    id: 4,
     description: 'Hot Chips with Tomato Sauce',
     image: frenchFries,
     price: 223
   },
   {
+    id: 5,
     description: 'Ravioli',
     image: ravioli,
     price: 100
   },
   {
+    id: 6,
     description: 'Salmon and Vegetables',
     image: salmonVegetables,
     price: 512
   },
   {
+    id: 7,
     description: 'Spaghetti with Sauce',
     image: spaghettiMeatSauce,
     price: 782
   },
   {
+    od: 8,
     description: 'Tortellini',
     image: tortellini,
     price: 100
@@ -60,65 +68,41 @@ const formatter = new Intl.NumberFormat('en-US', {
 });
 
 const App: React.FC = () => {
-  const [cartItems, setCartItems] = useState<object[]>([]);
+  const [cartItems, setCartItems] = useState<any[]>([]);
 
   return (
     <section className="container">
-      <Menu menuItems={menuItems} />
+      <Menu menuItems={menuItems} cartItems={cartItems} />
       <Cart cartItems={cartItems} />
     </section>
   );
 };
 
-const Menu: React.FC<{ menuItems: object[] }> = ({ menuItems }) => {
+const Menu: React.FC<{ menuItems: object[]; cartItems: any[] }> = ({
+  menuItems,
+  cartItems
+}) => {
   return (
     <div id="menu" className="panel panel__menu">
       <h2>To Go Menu</h2>
       <div className="panel__scroll-area">
         <ul id="menu__items">
-          {menuItems.map((item: any) => (
-            <MenuItem item={item} />
-          ))}
-          <li className="menu__item">
-            <h3 className="item__description">Salmon and Vegetables</h3>
-            <img
-              src="./assets/images/plate__salmon-vegetables.png"
-              alt="salmon and vegetables"
-            />
-            <div className="price price__large">$5.12</div>
-            <button className="item__add-remove">
-              <span className="button__content">Add to Cart</span>
-            </button>
-          </li>
-          <li className="menu__item">
-            <h3 className="item__description">Spaghetti with Sauce</h3>
-            <img
-              src="./assets/images/plate__spaghetti-meat-sauce.png"
-              alt="spaghetti with sauce"
-            />
-            <div className="price price__large">$7.82</div>
-            <button className="item__add-remove">
-              <span className="button__content">Add to Cart</span>
-            </button>
-          </li>
-          <li className="menu__item">
-            <h3 className="item__description">Bacon and Eggs</h3>
-            <img
-              src="./assets/images/plate__bacon-eggs.png"
-              alt="bacon and eggs"
-            />
-            <div className="price price__large">$3.44</div>
-            <button className="item__add-remove">
-              <span className="button__content">Add to Cart</span>
-            </button>
-          </li>
+          {menuItems.map((item: any) => {
+            const isInCart: boolean = !!cartItems.find(
+              (cartItem) => cartItem.id === item.id
+            );
+            return <MenuItem item={item} isInCart={isInCart} />;
+          })}
         </ul>
       </div>
     </div>
   );
 };
 
-const MenuItem: React.FC<{ item: any }> = ({ item }) => {
+const MenuItem: React.FC<{ item: any; isInCart: boolean }> = ({
+  item,
+  isInCart
+}) => {
   return (
     <li className="menu__item">
       <h3 className="item__description">{item.description}</h3>
@@ -126,8 +110,12 @@ const MenuItem: React.FC<{ item: any }> = ({ item }) => {
       <div className="price price__large">
         {formatter.format(item.price / 100)}
       </div>
-      <button className="item__add-remove button__active">
-        <span className="button__content">In Cart</span>
+      <button
+        className={`item__add-remove${isInCart ? ' button__active' : ''}`}
+      >
+        <span className="button__content">
+          {isInCart ? 'In Cart' : 'Add to Cart'}
+        </span>
       </button>
     </li>
   );
@@ -137,7 +125,7 @@ const Cart: React.FC<{ cartItems: object[] }> = ({ cartItems }) => {
   return (
     <div id="cart" className="panel panel__cart">
       <h2>Your Cart</h2>
-      {/* <p>Your cart is empty</p> */}
+      {cartItems.length === 0 && <p>Your cart is empty</p>}
       <div className="panel__scroll-area">
         <ul id="cart__items">
           <li className="cart__item">
