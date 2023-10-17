@@ -1,4 +1,4 @@
-# Advent of JS 2022 - Day 1 - Pomodoro Timer
+# Advent of JS 2022 - Day 2 - E-Commerce Component
 
 This is my submission for day 2 of the [Advent of JS](https://www.adventofjs.com/) challenge.
 
