@@ -10,7 +10,19 @@ import salmonVegetables from './assets/images/plate__salmon-vegetables.png';
 import spaghettiMeatSauce from './assets/images/plate__spaghetti-meat-sauce.png';
 import tortellini from './assets/images/plate__tortellini.png';
 
-const menuItems = [
+interface MenuItem {
+  id: number;
+  description: string;
+  image: any;
+  price: number;
+}
+
+interface CartItem {
+  id: number;
+  qty: number;
+}
+
+const menuItems: MenuItem[] = [
   {
     id: 1,
     description: 'Bacon and Eggs',
@@ -54,7 +66,7 @@ const menuItems = [
     price: 782
   },
   {
-    od: 8,
+    id: 8,
     description: 'Tortellini',
     image: tortellini,
     price: 100
@@ -68,9 +80,22 @@ const formatter = new Intl.NumberFormat('en-US', {
 });
 
 const App: React.FC = () => {
-  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+
+  const getCartItem = (id: number) => {};
 
   const handleAddRemove = (id: number, newQty: number) => {
+    const newItem = { id, qty: newQty };
+    setCartItems((prevItems) => {
+      const existingItem = prevItems.find((prevItem) => prevItem.id === id);
+
+      if (existingItem) {
+        const updatedItems = prevItems.filter((item) => item.id !== id);
+        return updatedItems;
+      } else {
+        return [...prevItems, newItem];
+      }
+    });
     console.log('handleAddRemove', id, newQty);
   };
 
@@ -119,7 +144,7 @@ const MenuItem: React.FC<{
   isInCart: boolean;
   handleAddRemove: any;
 }> = ({ item, isInCart, handleAddRemove }) => {
-  const newQty = !isInCart ? 1 : 0;
+  const newQty = isInCart ? 0 : 1;
 
   return (
     <li className="menu__item">
@@ -152,44 +177,6 @@ const Cart: React.FC<{ cartItems: object[] }> = ({ cartItems }) => {
             {cartItems.map((cartItem) => (
               <CartItem cartItem={cartItem} />
             ))}
-            <li className="cart__item">
-              <h3 className="item__description">Hot Chips with Tomato Sauce</h3>
-              <div className="item__image-container">
-                <img
-                  src="./assets/images/plate__french-fries.png"
-                  alt="hot chips with tomato sauce"
-                />
-                <div className="image__count-badge">2</div>
-              </div>
-              <div className="price">$2.23</div>
-              <div className="item__line">
-                <div className="line__options">
-                  <button className="options__decrement"></button>
-                  <span className="options__qty">2</span>
-                  <button className="options__increment"></button>
-                </div>
-                <span className="price price__large">$4.46</span>
-              </div>
-            </li>
-            <li className="cart__item">
-              <h3 className="item__description">Spaghetti with Sauce</h3>
-              <div className="item__image-container">
-                <img
-                  src="./assets/images/plate__spaghetti-meat-sauce.png"
-                  alt="spaghetti with sauce"
-                />
-                <div className="image__count-badge">2</div>
-              </div>
-              <div className="price">$7.82</div>
-              <div className="item__line">
-                <div className="line__options">
-                  <button className="options__decrement"></button>
-                  <span className="options__qty">2</span>
-                  <button className="options__increment"></button>
-                </div>
-                <span className="price price__large">$15.64</span>
-              </div>
-            </li>
           </ul>
           <hr />
           <div className="cart__totals">
