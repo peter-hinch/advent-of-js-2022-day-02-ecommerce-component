@@ -89,9 +89,11 @@ const App: React.FC = () => {
   const handleAddRemove = (id: number, newQty: number) => {
     const newItem = { id, qty: newQty };
     setCartItems((prevItems) => {
-      const existingItem = prevItems.find((prevItem) => prevItem.id === id);
+      const existingItemIndex = prevItems.findIndex(
+        (prevItem) => prevItem.id === id
+      );
 
-      if (existingItem) {
+      if (existingItemIndex !== -1) {
         const updatedItems = prevItems.filter((item) => item.id !== id);
         if (newQty < 1) {
           return [...updatedItems];
