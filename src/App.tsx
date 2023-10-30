@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 
 import baconEggs from './assets/images/plate__bacon-eggs.png';
@@ -73,16 +73,18 @@ const menuItems: MenuItem[] = [
   }
 ];
 
+const salesTax: number = 0.0975;
+
 // Currency format
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD'
 });
 
+const formatPrice = (price: number) => formatter.format(price / 100);
+
 const App: React.FC = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-
-  const getCartItem = (id: number) => {};
 
   const handleAddRemove = (id: number, newQty: number) => {
     const newItem = { id, qty: newQty };
@@ -91,7 +93,11 @@ const App: React.FC = () => {
 
       if (existingItem) {
         const updatedItems = prevItems.filter((item) => item.id !== id);
-        return updatedItems;
+        if (newQty < 1) {
+          return [...updatedItems];
+        } else {
+          return [...updatedItems, newItem];
+        }
       } else {
         return [...prevItems, newItem];
       }
@@ -101,17 +107,21 @@ const App: React.FC = () => {
 
   return (
     <section className="container">
-      <Menu
+      <MenuComponent
         menuItems={menuItems}
         cartItems={cartItems}
         handleAddRemove={handleAddRemove}
       />
-      <Cart cartItems={cartItems} />
+      <CartComponent
+        cartItems={cartItems}
+        handleAddRemove={handleAddRemove}
+        salesTax={salesTax}
+      />
     </section>
   );
 };
 
-const Menu: React.FC<{
+const MenuComponent: React.FC<{
   menuItems: object[];
   cartItems: any[];
   handleAddRemove: Function;
@@ -126,7 +136,8 @@ const Menu: React.FC<{
               (cartItem) => cartItem.id === item.id
             );
             return (
-              <MenuItem
+              <MenuItemComponent
+                key={`menu-item-${item.id}`}
                 item={item}
                 isInCart={isInCart}
                 handleAddRemove={handleAddRemove}
@@ -139,7 +150,7 @@ const Menu: React.FC<{
   );
 };
 
-const MenuItem: React.FC<{
+const MenuItemComponent: React.FC<{
   item: any;
   isInCart: boolean;
   handleAddRemove: any;
@@ -150,9 +161,7 @@ const MenuItem: React.FC<{
     <li className="menu__item">
       <h3 className="item__description">{item.description}</h3>
       <img src={item.image} alt={item.description?.toLowerCase()} />
-      <div className="price price__large">
-        {formatter.format(item.price / 100)}
-      </div>
+      <div className="price price__large">{formatPrice(item.price)}</div>
       <button
         className={`item__add-remove${isInCart ? ' button__active' : ''}`}
         onClick={() => handleAddRemove(item.id, newQty)}
@@ -165,7 +174,24 @@ const MenuItem: React.FC<{
   );
 };
 
-const Cart: React.FC<{ cartItems: object[] }> = ({ cartItems }) => {
+const CartComponent: React.FC<{
+  cartItems: CartItem[];
+  handleAddRemove: Function;
+  salesTax: number;
+}> = ({ cartItems, handleAddRemove, salesTax }) => {
+  const getMenuItem = (id: number) => menuItems.find((item) => item.id === id);
+
+  const [subTotal, setSubTotal] = useState<number>(0);
+
+  useEffect(() => {
+    setSubTotal(
+      cartItems.reduce((acc: number, item: CartItem) => {
+        const menuItem: MenuItem | undefined = getMenuItem(item.id);
+        return menuItem?.price ? acc + menuItem?.price * item.qty : acc;
+      }, 0)
+    );
+  }, [cartItems]);
+
   return (
     <div id="cart" className="panel panel__cart">
       <h2>Your Cart</h2>
@@ -175,17 +201,26 @@ const Cart: React.FC<{ cartItems: object[] }> = ({ cartItems }) => {
         <div className="panel__scroll-area">
           <ul id="cart__items">
             {cartItems.map((cartItem) => (
-              <CartItem cartItem={cartItem} />
+              <CartItemComponent
+                key={`cart-item-${cartItem.id}`}
+                cartItem={cartItem}
+                getMenuItem={getMenuItem}
+                handleAddRemove={handleAddRemove}
+              />
             ))}
           </ul>
           <hr />
           <div className="cart__totals">
             <div className="totals__label">Subtotal:</div>
-            <div className="price price__large">$20.10</div>
+            <div className="price price__large">{formatPrice(subTotal)}</div>
             <div className="totals__label">Tax:</div>
-            <div className="price price__large">$1.96</div>
+            <div className="price price__large">
+              {formatPrice(subTotal * salesTax)}
+            </div>
             <div className="totals__label">Total:</div>
-            <div className="price price__large price__total">$30.12</div>
+            <div className="price price__large price__total">
+              {formatPrice(subTotal + subTotal * salesTax)}
+            </div>
           </div>
         </div>
       )}
@@ -193,25 +228,36 @@ const Cart: React.FC<{ cartItems: object[] }> = ({ cartItems }) => {
   );
 };
 
-const CartItem: React.FC<{ cartItem: any }> = ({ cartItem }) => {
+const CartItemComponent: React.FC<{
+  cartItem: any;
+  getMenuItem: Function;
+  handleAddRemove: Function;
+}> = ({ cartItem, getMenuItem, handleAddRemove }) => {
+  const menuItem = getMenuItem(cartItem.id);
+
   return (
     <li className="cart__item">
-      <h3 className="item__description">{cartItem.description}</h3>
+      <h3 className="item__description">{menuItem.description}</h3>
       <div className="item__image-container">
-        <img
-          src="./assets/images/plate__french-fries.png"
-          alt={cartItem.description?.toLowerCase()}
-        />
+        <img src={menuItem.image} alt={menuItem.description?.toLowerCase()} />
         <div className="image__count-badge">2</div>
       </div>
-      <div className="price">{formatter.format(cartItem.price / 100)}</div>
+      <div className="price">{formatter.format(menuItem.price / 100)}</div>
       <div className="item__line">
         <div className="line__options">
-          <button className="options__decrement"></button>
-          <span className="options__qty">2</span>
-          <button className="options__increment"></button>
+          <button
+            className="options__decrement"
+            onClick={() => handleAddRemove(cartItem.id, cartItem.qty - 1)}
+          ></button>
+          <span className="options__qty">{cartItem.qty}</span>
+          <button
+            className="options__increment"
+            onClick={() => handleAddRemove(cartItem.id, cartItem.qty + 1)}
+          ></button>
         </div>
-        <span className="price price__large">$4.46</span>
+        <span className="price price__large">
+          {formatPrice(menuItem.price * cartItem.qty)}
+        </span>
       </div>
     </li>
   );
