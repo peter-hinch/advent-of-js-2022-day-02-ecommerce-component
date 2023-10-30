@@ -143,6 +143,10 @@ li.menu__item {
   padding: 42px 29px 0 169px;
 }
 
+li.menu__item:last-of-type {
+  margin-bottom: 20px;
+}
+
 li.menu__item img {
   position: absolute;
   top: 0;
