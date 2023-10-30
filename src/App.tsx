@@ -94,11 +94,15 @@ const App: React.FC = () => {
       );
 
       if (existingItemIndex !== -1) {
-        const updatedItems = prevItems.filter((item) => item.id !== id);
         if (newQty < 1) {
-          return [...updatedItems];
+          return prevItems.filter((item) => item.id !== id);
         } else {
-          return [...updatedItems, newItem];
+          return prevItems.map((item) => {
+            if (item.id === id) {
+              return newItem;
+            }
+            return item;
+          });
         }
       } else {
         return [...prevItems, newItem];
