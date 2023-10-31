@@ -10,6 +10,7 @@ Please feel free to check out my other Advent of JS repos:
 
 - [Day 1 - Pomodoro Timer](https://github.com/peter-hinch/advent-of-js-2022-day-01-pomodoro-timer)
 - Day 2 - E-Commerce Component
+- [Day 3 - Piano](https://github.com/peter-hinch/advent-of-js-2022-day-03-piano)
 
 I have also participated in Advent of CSS. You can check out these repos, here:
 
