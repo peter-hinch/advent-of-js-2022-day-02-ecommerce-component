@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+
+import 'normalize.css';
+
 import './App.css';
 
 import baconEggs from './assets/images/plate__bacon-eggs.png';
