@@ -249,7 +249,7 @@ const CartItemComponent: React.FC<{
       <h3 className="item__description">{menuItem.description}</h3>
       <div className="item__image-container">
         <img src={menuItem.image} alt={menuItem.description?.toLowerCase()} />
-        <div className="image__count-badge">2</div>
+        <div className="image__count-badge">{cartItem.qty}</div>
       </div>
       <div className="price">{formatter.format(menuItem.price / 100)}</div>
       <div className="item__line">
